@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
 const encrypt = require('mongoose-encryption');
+const md5 = require('md5');
 
 app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -21,10 +22,7 @@ const userSchema = new mongoose.Schema({
     password: String
 });
 
-userSchema.plugin(encrypt, { secret: process.env.SECRET_KEY, encryptedFields: ['password'] })
-
 const User = mongoose.model("User", userSchema);
-
 
 app.get("/", (req, res) => {
     res.render("home");
@@ -37,7 +35,7 @@ app.route("/register")
     .post((req, res) => {
         User.create({
             email: req.body.username,
-            password: req.body.password
+            password: md5(req.body.password)
         }).then(() => {
             res.render("secrets")
         }).catch((err) => {
@@ -52,7 +50,7 @@ app.route("/login")
     .post((req, res) => {
         User.findOne({ email: req.body.username }).then((foundUser) => {
             if (foundUser) {
-                if (foundUser.password === req.body.password) {
+                if (foundUser.password === md5(req.body.password)) {
                     res.render("secrets")
                 } else {
                     console.log('Invalid Credentials');
