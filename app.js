@@ -94,6 +94,15 @@ app.get("/secrets", (req, res) => {
     }
 })
 
+app.get("/logout", (req, res, next) => {
+    req.logout((err) => {
+        if (err) {
+            return next(err);
+        }
+        res.redirect('/');
+    });
+})
+
 app.listen(3000, () => {
     console.log("Server running in http://127.0.0.1:3000");
 });
